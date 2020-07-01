@@ -1,0 +1,117 @@
+<html><head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>TOTP One-time password</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <script type="text/javascript" src="http://caligatio.github.io/jsSHA/sha.js"></script>
+
+ 
+
+</head>
+<body>
+       <div class="container-fluid">
+       <div>
+            <div class="row">
+
+                <fieldset>
+                   
+                    <div class="clearfix">
+                        <label>One-time Password</label>
+                        <div class="input"><span class="label label-primary" id="otp"></span></div>
+                    </div>
+                    <!-- /clearfix -->
+                    <div class="clearfix">
+                        <label>Updating in</label>
+                        <div class="input"><span id="updatingIn">1</span></div>
+                    </div>
+                    <!-- /clearfix -->
+                    
+            
+                </fieldset>
+
+                </div>
+            </div>
+        </div>
+
+
+    <script type="text/javascript">//<![CDATA[
+
+
+    function dec2hex(s) { return (s < 15.5 ? '0' : '') + Math.round(s).toString(16); }
+    function hex2dec(s) { return parseInt(s, 16); }
+
+    function base32tohex(base32) {
+        var base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        var bits = "";
+        var hex = "";
+
+        for (var i = 0; i < base32.length; i++) {
+            var val = base32chars.indexOf(base32.charAt(i).toUpperCase());
+            bits += leftpad(val.toString(2), 5, '0');
+        }
+
+        for (var i = 0; i+4 <= bits.length; i+=4) {
+            var chunk = bits.substr(i, 4);
+            hex = hex + parseInt(chunk, 2).toString(16) ;
+        }
+        return hex;
+
+    }
+
+    function leftpad(str, len, pad) {
+        if (len + 1 >= str.length) {
+            str = Array(len + 1 - str.length).join(pad) + str;
+        }
+        return str;
+    }
+
+    function updateOtp() {
+        var urlParams = new URLSearchParams(location.search);
+        var secret = urlParams.get('secret'); 
+        var key = base32tohex(secret);
+        var epoch = Math.round(new Date().getTime() / 1000.0);
+        var time = leftpad(dec2hex(Math.floor(epoch / 30)), 16, '0');
+        // updated for jsSHA v2.0.0 - http://caligatio.github.io/jsSHA/
+        var shaObj = new jsSHA("SHA-1", "HEX");
+        shaObj.setHMACKey(key, "HEX");
+        shaObj.update(time);
+        var hmac = shaObj.getHMAC("HEX");
+
+        var offset = hex2dec(hmac.substring(hmac.length - 1));
+
+        var otp = (hex2dec(hmac.substr(offset * 2, 8)) & hex2dec('7fffffff')) + '';
+        otp = (otp).substr(otp.length - 6, 6);
+
+        $('#otp').text(otp);
+        timer();
+    }
+
+function timer()
+{
+    var epoch = Math.round(new Date().getTime() / 1000.0);
+    var countDown = 30 - (epoch % 30);
+    if (epoch % 30 == 0) updateOtp();
+    $('#updatingIn').text(countDown);
+    
+}
+
+    $(function () {
+        updateOtp();
+
+        //setInterval(timer, 1000);
+    });
+
+
+  //]]></script>
+
+ 
+
+
+
+</body></html>
