@@ -9,7 +9,7 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-  <script type="text/javascript" src="http://caligatio.github.io/jsSHA/sha.js"></script>
+  <script type="text/javascript" src="./sha.js"></script>
 
  
 
@@ -44,7 +44,6 @@
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
-        alert ("a:"+url);
         name = name.replace(/[\[\]]/g, '\\$&');
         var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
             results = regex.exec(url);
