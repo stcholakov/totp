@@ -42,7 +42,16 @@
 
     <script type="text/javascript">//<![CDATA[
 
-
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+        
     function dec2hex(s) { return (s < 15.5 ? '0' : '') + Math.round(s).toString(16); }
     function hex2dec(s) { return parseInt(s, 16); }
 
@@ -72,8 +81,8 @@
     }
 
     function updateOtp() {
-        var urlParams = new URLSearchParams(location.search);
-        var secret = urlParams.get('secret'); 
+        //var urlParams = new URLSearchParams(location.search);
+        var secret = getParameterByName('secret'); 
         var key = base32tohex(secret);
         var epoch = Math.round(new Date().getTime() / 1000.0);
         var time = leftpad(dec2hex(Math.floor(epoch / 30)), 16, '0');
